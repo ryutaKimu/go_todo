@@ -1,7 +1,7 @@
 package main
 
 import (
-	"go_todo_app/router"
+	"github.com/ryutaKimu/go_todo/api/router"
 	"log"
 	"net/http"
 )

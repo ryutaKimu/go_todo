@@ -1,4 +1,4 @@
-module go_todo_app
+module github.com/ryutaKimu/go_todo/api
 
 go 1.25.0
 

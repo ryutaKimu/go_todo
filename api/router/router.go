@@ -1,7 +1,7 @@
 package router
 
 import (
-	"go_todo_app/handler"
+	"github.com/ryutaKimu/go_todo/api/handler"
 
 	"github.com/go-chi/chi/v5"
 )
