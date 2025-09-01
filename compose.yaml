@@ -1,9 +1,12 @@
 services:
   go:
     build:
-      context: .
-      dockerfile: ./api/dockerfile
+      context: ./api
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     volumes:
       - ./api:/app
+      - ./api/tmp:/app/tmp
+    environment:
+      - AIR_ROOT=/app

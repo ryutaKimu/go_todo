@@ -6,10 +6,13 @@ WORKDIR /app
 RUN go install github.com/air-verse/air@latest
 
 # go.mod だけコピーして依存解決
-COPY api/go.mod ./
+COPY go.mod ./
 RUN go mod tidy
 
-# ソースコードをコピー（main.go + router + handler）
-COPY api/ ./
+# ソースコードをコピー
+COPY . .
+
+# 必要なディレクトリを作成
+RUN mkdir -p tmp
 
 CMD ["air"]
