@@ -43,6 +43,6 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
-      - db_data:/postgre_log:/var/log/postgresql
+      - ${VOLUME}/postgre_log:/var/log/postgresql
     networks:
       - app_network

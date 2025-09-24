@@ -6,7 +6,10 @@ RUN apt-get update && \
   sed -i '/ja_JP.UTF-8/s/^# //g' /etc/locale.gen && \
   locale-gen ja_JP.UTF-8
 
+COPY ./infra/db/postgresql.conf /etc/postgresql/postgresql.conf
 ENV LANG ja_JP.UTF-8
 ENV LANGUAGE ja_JP:ja
 ENV LC_ALL ja_JP.UTF-8
 ENV TZ Asia/Tokyo
+
+CMD ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
