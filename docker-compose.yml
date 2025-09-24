@@ -1,5 +1,8 @@
 volumes:
-  db_data: {}
+  app_data_postgres:
+    name: ${VOLUME}/postgres
+  app_data_postgres_log:
+    name: ${VOLUME}/postgres_log
 
 networks:
   app_network:
@@ -16,33 +19,39 @@ services:
       - .:/app
       - ./tmp:/app/tmp
     environment:
-      AIR_ROOT: /app
-      POSTGRE_USER: ${POSTGRE_USER}
-      POSTGRE_PASSWORD: ${POSTGRE_PASSWORD}
-      POSTGRE_HOST: ${POSTGRE_HOST}
-      POSTGRE_PORT: ${POSTGRE_PORT}
-      POSTGRE_DATABASE: ${POSTGRE_DATABASE}
-      GOOSE_DRIVER: ${GOOSE_DRIVER}
-      GOOSE_DBSTRING: ${GOOSE_DBSTRING}
-      GOOSE_MIGRATION_DIR: ${GOOSE_MIGRATION_DIR}
-      GOOSE_TABLE: ${GOOSE_TABLE}
+      - AIR_ROOT=/app
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DATABASE=${POSTGRES_DATABASE}
+      - GOOSE_DRIVER=${GOOSE_DRIVER}
+      - GOOSE_DBSTRING=${GOOSE_DBSTRING}
+      - GOOSE_MIGRATION_DIR=${GOOSE_MIGRATION_DIR}
+      - GOOSE_TABLE=${GOOSE_TABLE}
     networks:
       - app_network
     depends_on:
-      - postgre
+      - postgres
 
-  postgre:
+  postgres:
     build:
       context: .
       dockerfile: ./infra/db/Dockerfile
     environment:
-      POSTGRES_USER: ${POSTGRE_USER}
-      POSTGRES_PASSWORD: ${POSTGRE_PASSWORD}
-      POSTGRES_DB: ${POSTGRE_DATABASE}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DATABASE}
     ports:
       - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
-      - ${VOLUME}/postgre_log:/var/log/postgresql
+      - ${VOLUME}/postgres:/var/lib/postgresql/data
+      - ${VOLUME}/postgres_log:/var/log/postgresql
     networks:
       - app_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DATABASE} || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
