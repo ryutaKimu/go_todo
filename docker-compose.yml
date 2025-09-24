@@ -1,0 +1,48 @@
+volumes:
+  db_data: {}
+
+networks:
+  app_network:
+    driver: bridge
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./infra/go/Dockerfile
+    ports:
+      - "9090:9090"
+    volumes:
+      - .:/app
+      - ./tmp:/app/tmp
+    environment:
+      AIR_ROOT: /app
+      POSTGRE_USER: ${POSTGRE_USER}
+      POSTGRE_PASSWORD: ${POSTGRE_PASSWORD}
+      POSTGRE_HOST: ${POSTGRE_HOST}
+      POSTGRE_PORT: ${POSTGRE_PORT}
+      POSTGRE_DATABASE: ${POSTGRE_DATABASE}
+      GOOSE_DRIVER: ${GOOSE_DRIVER}
+      GOOSE_DBSTRING: ${GOOSE_DBSTRING}
+      GOOSE_MIGRATION_DIR: ${GOOSE_MIGRATION_DIR}
+      GOOSE_TABLE: ${GOOSE_TABLE}
+    networks:
+      - app_network
+    depends_on:
+      - postgre
+
+  postgre:
+    build:
+      context: .
+      dockerfile: ./infra/db/Dockerfile
+    environment:
+      POSTGRES_USER: ${POSTGRE_USER}
+      POSTGRES_PASSWORD: ${POSTGRE_PASSWORD}
+      POSTGRES_DB: ${POSTGRE_DATABASE}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - db_data:/postgre_log:/var/log/postgresql
+    networks:
+      - app_network
