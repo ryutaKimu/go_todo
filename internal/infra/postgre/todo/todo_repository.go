@@ -72,7 +72,7 @@ func (r *TodoRepositoryImpl) CreateTodo(ctx context.Context, todo *model.Todo) e
 	return nil
 }
 
-func (r *TodoRepositoryImpl) UpdateTodo(ctx context.Context, todo *model.Todo) error {
+func (r *TodoRepositoryImpl) UpdateTodo(ctx context.Context, userId int, todo *model.Todo) error {
 	query, args, err := r.goqu.Update("todos").
 		Set(goqu.Record{
 			"title":        todo.Title,
@@ -80,7 +80,7 @@ func (r *TodoRepositoryImpl) UpdateTodo(ctx context.Context, todo *model.Todo) e
 			"updated_at":   goqu.L("NOW()"),
 		}).
 		Where(goqu.Ex{
-			"id": todo.Id,
+			"id": userId,
 		}).
 		ToSQL()
 
