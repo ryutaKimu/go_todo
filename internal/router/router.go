@@ -11,13 +11,12 @@ import (
 
 func NewRouter(pg *sql.DB) *chi.Mux {
 	r := chi.NewRouter()
-	helloController := controller.NewHelloController()
 	repo := todo.NewTodoRepository(pg)
 	todoService := service.NewTodoService(repo)
 	todoController := controller.NewTodoController(todoService)
 
-	r.Get("/", helloController.GetHello)
 	r.Post("/create", todoController.CreateTodoHandler)
+	r.Put("/update", todoController.UpdateTodo)
 
 	return r
 }

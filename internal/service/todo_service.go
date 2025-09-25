@@ -19,3 +19,7 @@ func NewTodoService(repo repository.TodoRepository) services.TodoService {
 func (s *TodoServiceImpl) CreateTodo(ctx context.Context, todo *model.Todo) error {
 	return s.repo.CreateTodo(ctx, todo)
 }
+
+func (s *TodoServiceImpl) UpdateTodo(ctx context.Context, todo *model.Todo) error {
+	return s.repo.UpdateTodo(ctx, todo)
+}

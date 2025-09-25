@@ -41,3 +41,37 @@ func (r *TodoRepositoryImpl) CreateTodo(ctx context.Context, todo *model.Todo) e
 
 	return nil
 }
+
+func (r *TodoRepositoryImpl) UpdateTodo(ctx context.Context, todo *model.Todo) error {
+	query, args, err := r.goqu.Update("todos").
+		Set(goqu.Record{
+			"title":        todo.Title,
+			"is_completed": todo.IsCompleted,
+			"updated_at":   goqu.L("NOW()"),
+		}).
+		Where(goqu.Ex{
+			"id": todo.Id,
+		}).
+		ToSQL()
+
+	if err != nil {
+		return err
+	}
+
+	res, err := r.db.ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+
+}

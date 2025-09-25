@@ -33,3 +33,21 @@ func (c *TodoController) CreateTodoHandler(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(todo)
 }
+
+func (c *TodoController) UpdateTodo(w http.ResponseWriter, r *http.Request) {
+	var todo model.Todo
+
+	if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if err := c.service.UpdateTodo(r.Context(), &todo); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(todo)
+}
