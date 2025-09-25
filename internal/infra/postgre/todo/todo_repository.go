@@ -105,3 +105,31 @@ func (r *TodoRepositoryImpl) UpdateTodo(ctx context.Context, todo *model.Todo) e
 	return nil
 
 }
+
+func (r *TodoRepositoryImpl) DeleteTodo(ctx context.Context, userId int) error {
+	query, _, err := r.goqu.Delete("todos").
+		Where(goqu.Ex{"id": userId}).
+		ToSQL()
+
+	if err != nil {
+		return err
+	}
+
+	res, err := r.db.ExecContext(ctx, query)
+
+	if err != nil {
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}

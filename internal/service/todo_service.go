@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/ryutaKimu/go_todo/internal/controller/services"
 	"github.com/ryutaKimu/go_todo/internal/model"
@@ -26,4 +27,14 @@ func (s *TodoServiceImpl) CreateTodo(ctx context.Context, todo *model.Todo) erro
 
 func (s *TodoServiceImpl) UpdateTodo(ctx context.Context, todo *model.Todo) error {
 	return s.repo.UpdateTodo(ctx, todo)
+}
+
+func (s *TodoServiceImpl) DeleteTodo(ctx context.Context, userId string) error {
+	id, err := strconv.Atoi(userId)
+
+	if err != nil {
+		return err
+	}
+
+	return s.repo.DeleteTodo(ctx, id)
 }
