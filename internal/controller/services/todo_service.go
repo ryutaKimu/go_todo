@@ -8,4 +8,5 @@ import (
 
 type TodoService interface {
 	CreateTodo(ctx context.Context, todo *model.Todo) error
+	UpdateTodo(ctx context.Context, todo *model.Todo) error
 }
