@@ -51,6 +51,7 @@ func (c *TodoController) CreateTodoHandler(w http.ResponseWriter, r *http.Reques
 }
 
 func (c *TodoController) UpdateTodoHandler(w http.ResponseWriter, r *http.Request) {
+	userId := chi.URLParam(r, "id")
 	var todo model.Todo
 
 	if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
@@ -58,7 +59,7 @@ func (c *TodoController) UpdateTodoHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if err := c.service.UpdateTodo(r.Context(), &todo); err != nil {
+	if err := c.service.UpdateTodo(r.Context(), userId, &todo); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -68,7 +69,7 @@ func (c *TodoController) UpdateTodoHandler(w http.ResponseWriter, r *http.Reques
 	json.NewEncoder(w).Encode(todo)
 }
 
-func (c *TodoController) DeleteTodo(w http.ResponseWriter, r *http.Request) {
+func (c *TodoController) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	userId := chi.URLParam(r, "id")
 
 	if err := c.service.DeleteTodo(r.Context(), userId); err != nil {
