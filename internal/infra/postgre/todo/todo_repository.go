@@ -21,6 +21,36 @@ func NewTodoRepository(db *sql.DB) repository.TodoRepository {
 	}
 }
 
+func (r *TodoRepositoryImpl) FetchAllTodo(ctx context.Context) ([]*model.Todo, error) {
+	query, args, err := r.goqu.
+		From("todos").
+		Select("id", "title", "is_completed").
+		ToSQL()
+
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var todos []*model.Todo
+
+	for rows.Next() {
+		var t model.Todo
+		if err := rows.Scan(&t.Id, &t.Title, &t.IsCompleted); err != nil {
+			return nil, err
+		}
+		todos = append(todos, &t)
+	}
+
+	return todos, nil
+}
+
 func (r *TodoRepositoryImpl) CreateTodo(ctx context.Context, todo *model.Todo) error {
 	record := goqu.Record{
 		"title":        todo.Title,

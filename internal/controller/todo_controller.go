@@ -16,6 +16,21 @@ func NewTodoController(service services.TodoService) *TodoController {
 	return &TodoController{service: service}
 }
 
+func (c *TodoController) FetchAllTodoHandler(w http.ResponseWriter, r *http.Request) {
+	todos, err := c.service.FetchAllTodo(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(todos); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
 func (c *TodoController) CreateTodoHandler(w http.ResponseWriter, r *http.Request) {
 	var todo model.Todo
 
@@ -34,7 +49,7 @@ func (c *TodoController) CreateTodoHandler(w http.ResponseWriter, r *http.Reques
 	json.NewEncoder(w).Encode(todo)
 }
 
-func (c *TodoController) UpdateTodo(w http.ResponseWriter, r *http.Request) {
+func (c *TodoController) UpdateTodoHandler(w http.ResponseWriter, r *http.Request) {
 	var todo model.Todo
 
 	if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
