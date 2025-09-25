@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/ryutaKimu/go_todo/internal/controller/services"
 	"github.com/ryutaKimu/go_todo/internal/model"
 )
@@ -65,4 +66,15 @@ func (c *TodoController) UpdateTodoHandler(w http.ResponseWriter, r *http.Reques
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(todo)
+}
+
+func (c *TodoController) DeleteTodo(w http.ResponseWriter, r *http.Request) {
+	userId := chi.URLParam(r, "id")
+
+	if err := c.service.DeleteTodo(r.Context(), userId); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
 }

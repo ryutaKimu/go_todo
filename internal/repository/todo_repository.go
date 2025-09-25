@@ -10,4 +10,5 @@ type TodoRepository interface {
 	FetchAllTodo(ctx context.Context) ([]*model.Todo, error)
 	CreateTodo(ctx context.Context, todo *model.Todo) error
 	UpdateTodo(ctx context.Context, todo *model.Todo) error
+	DeleteTodo(ctx context.Context, id int) error
 }
