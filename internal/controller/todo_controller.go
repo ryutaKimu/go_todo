@@ -32,6 +32,20 @@ func (c *TodoController) FetchAllTodoHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 }
+
+func (c *TodoController) FindTodoHandler(w http.ResponseWriter, r *http.Request) {
+	userId := chi.URLParam(r, "id")
+	todo, err := c.service.FindTodoById(r.Context(), userId)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(todo)
+}
+
 func (c *TodoController) CreateTodoHandler(w http.ResponseWriter, r *http.Request) {
 	var todo model.Todo
 
