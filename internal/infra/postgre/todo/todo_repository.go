@@ -36,6 +36,10 @@ func (r *TodoRepositoryImpl) FetchAllTodo(ctx context.Context) ([]*model.Todo, e
 		return nil, err
 	}
 
+	if err == sql.ErrNoRows {
+		return nil, err
+	}
+
 	defer rows.Close()
 
 	var todos []*model.Todo
@@ -69,7 +73,7 @@ func (r *TodoRepositoryImpl) FindTodoById(ctx context.Context, userId int) (*mod
 		Scan(&todo.Id, &todo.Title, &todo.IsCompleted)
 
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return nil, err
 	}
 
 	if err != nil {
