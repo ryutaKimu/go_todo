@@ -2,7 +2,11 @@ package service
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+	"fmt"
 	"strconv"
+	"unicode/utf8"
 
 	"github.com/ryutaKimu/go_todo/internal/controller/services"
 	"github.com/ryutaKimu/go_todo/internal/model"
@@ -18,16 +22,32 @@ func NewTodoService(repo repository.TodoRepository) services.TodoService {
 }
 
 func (s *TodoServiceImpl) FetchAllTodo(ctx context.Context) ([]*model.Todo, error) {
-	return s.repo.FetchAllTodo(ctx)
-}
+	todos, err := s.repo.FetchAllTodo(ctx)
 
-func (s *TodoServiceImpl) FindTodoById(ctx context.Context, id string) (*model.Todo, error) {
-	userId, err := strconv.Atoi(id)
+	if len(todos) == 0 {
+		return nil, fmt.Errorf("todoが存在しません: %w", sql.ErrNoRows)
+	}
+
 	if err != nil {
 		return nil, err
 	}
 
+	return todos, nil
+}
+
+func (s *TodoServiceImpl) FindTodoById(ctx context.Context, id string) (*model.Todo, error) {
+	userId, err := strconv.Atoi(id)
+
+	if err != nil {
+		return nil, fmt.Errorf("不正なパラムが検知されました。%w", err)
+	}
+
 	todo, err := s.repo.FindTodoById(ctx, userId)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		err := fmt.Errorf("Todoは存在しません:%w", sql.ErrNoRows)
+		return nil, err
+	}
 
 	if err != nil {
 		return nil, err
@@ -36,23 +56,41 @@ func (s *TodoServiceImpl) FindTodoById(ctx context.Context, id string) (*model.T
 }
 
 func (s *TodoServiceImpl) CreateTodo(ctx context.Context, todo *model.Todo) error {
+	const MAX_TITLE_LENGTH = 20
+
+	if utf8.RuneCountInString(todo.Title) > MAX_TITLE_LENGTH {
+		return fmt.Errorf("タイトルは%d文字で入力してください", MAX_TITLE_LENGTH)
+	}
 	return s.repo.CreateTodo(ctx, todo)
 }
 
-func (s *TodoServiceImpl) UpdateTodo(ctx context.Context, userId string, todo *model.Todo) error {
-	id, err := strconv.Atoi(userId)
+func (s *TodoServiceImpl) UpdateTodo(ctx context.Context, id string, todo *model.Todo) error {
+	userId, err := strconv.Atoi(id)
+
 	if err != nil {
+		return fmt.Errorf("不正なパラムが検知されました。%w", err)
+	}
+
+	err = s.repo.UpdateTodo(ctx, userId, todo)
+	if errors.Is(err, sql.ErrNoRows) {
+		err := fmt.Errorf("Todoは存在しません:%w", sql.ErrNoRows)
 		return err
 	}
-	return s.repo.UpdateTodo(ctx, id, todo)
+	return nil
 }
 
 func (s *TodoServiceImpl) DeleteTodo(ctx context.Context, userId string) error {
 	id, err := strconv.Atoi(userId)
-
 	if err != nil {
+		return fmt.Errorf("不正なパラムが検知されました。%w", err)
+	}
+
+	err = s.repo.DeleteTodo(ctx, id)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		err := fmt.Errorf("Todoは存在しません:%w", sql.ErrNoRows)
 		return err
 	}
 
-	return s.repo.DeleteTodo(ctx, id)
+	return nil
 }

@@ -24,7 +24,6 @@ func (c *TodoController) FetchAllTodoHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(todos); err != nil {
@@ -50,7 +49,7 @@ func (c *TodoController) CreateTodoHandler(w http.ResponseWriter, r *http.Reques
 	var todo model.Todo
 
 	if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		http.Error(w, "無効なリクエストが送信されました", http.StatusBadRequest)
 		return
 	}
 
@@ -69,7 +68,7 @@ func (c *TodoController) UpdateTodoHandler(w http.ResponseWriter, r *http.Reques
 	var todo model.Todo
 
 	if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		http.Error(w, "無効なリクエストが送信されました", http.StatusBadRequest)
 		return
 	}
 
@@ -87,7 +86,7 @@ func (c *TodoController) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	userId := chi.URLParam(r, "id")
 
 	if err := c.service.DeleteTodo(r.Context(), userId); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "無効なリクエストが送信されました", http.StatusInternalServerError)
 		return
 	}
 
