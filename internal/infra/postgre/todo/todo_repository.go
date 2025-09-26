@@ -51,6 +51,34 @@ func (r *TodoRepositoryImpl) FetchAllTodo(ctx context.Context) ([]*model.Todo, e
 	return todos, nil
 }
 
+func (r *TodoRepositoryImpl) FindTodoById(ctx context.Context, userId int) (*model.Todo, error) {
+	query, args, err := r.goqu.
+		From("todos").
+		Select("id", "title", "is_completed").
+		Where(goqu.Ex{
+			"id": userId,
+		}).
+		ToSQL()
+
+	if err != nil {
+		return nil, err
+	}
+
+	todo := &model.Todo{}
+	err = r.db.QueryRowContext(ctx, query, args...).
+		Scan(&todo.Id, &todo.Title, &todo.IsCompleted)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return todo, nil
+}
+
 func (r *TodoRepositoryImpl) CreateTodo(ctx context.Context, todo *model.Todo) error {
 	record := goqu.Record{
 		"title":        todo.Title,

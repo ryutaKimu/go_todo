@@ -21,6 +21,20 @@ func (s *TodoServiceImpl) FetchAllTodo(ctx context.Context) ([]*model.Todo, erro
 	return s.repo.FetchAllTodo(ctx)
 }
 
+func (s *TodoServiceImpl) FindTodoById(ctx context.Context, id string) (*model.Todo, error) {
+	userId, err := strconv.Atoi(id)
+	if err != nil {
+		return nil, err
+	}
+
+	todo, err := s.repo.FindTodoById(ctx, userId)
+
+	if err != nil {
+		return nil, err
+	}
+	return todo, nil
+}
+
 func (s *TodoServiceImpl) CreateTodo(ctx context.Context, todo *model.Todo) error {
 	return s.repo.CreateTodo(ctx, todo)
 }
