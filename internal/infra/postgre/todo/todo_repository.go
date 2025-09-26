@@ -57,7 +57,7 @@ func (r *TodoRepositoryImpl) FetchAllTodo(ctx context.Context) ([]*model.Todo, e
 
 func (r *TodoRepositoryImpl) FindTodoById(ctx context.Context, userId int) (*model.Todo, error) {
 	query, args, err := r.goqu.
-		From("todo").
+		From("todos").
 		Select("id", "title", "is_completed").
 		Where(goqu.Ex{
 			"id": userId,
