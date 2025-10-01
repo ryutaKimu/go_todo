@@ -89,16 +89,34 @@ func (r *TodoRepositoryImpl) CreateTodo(ctx context.Context, todo *model.Todo) e
 		"is_completed": todo.IsCompleted,
 	}
 
-	query, args, err := r.goqu.Insert("todos").Rows(record).ToSQL()
+	query, args, err := r.goqu.Insert("todos").Rows(record).Returning("id").ToSQL()
 
 	if err != nil {
 		return err
 	}
 
-	_, err = r.db.Exec(query, args...)
+	var todoID int
+	err = r.db.QueryRowContext(ctx, query, args...).Scan(&todoID)
 
 	if err != nil {
 		return err
+	}
+
+	for _, tagId := range todo.TagIds {
+		record := goqu.Record{
+			"todo_id": todoID,
+			"tag_id":  tagId,
+		}
+		query, args, err := r.goqu.Insert("todo_tags").Rows(record).ToSQL()
+
+		if err != nil {
+			return err
+		}
+		_, err = r.db.Exec(query, args...)
+
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
