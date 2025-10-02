@@ -17,7 +17,7 @@ func NewRouter(pg *sql.DB) *chi.Mux {
 
 	r.Get("/todos", todoController.FetchAllTodoHandler)
 	r.Get("/todos/{id}", todoController.FindTodoHandler)
-	r.Post("/create", todoController.CreateTodoHandler)
+	r.Post("/todos", todoController.CreateTodoHandler)
 	r.Put("/todos/{id}", todoController.UpdateTodoHandler)
 	r.Delete("/todos/{id}", todoController.DeleteHandler)
 

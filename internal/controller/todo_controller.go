@@ -41,7 +41,7 @@ func (c *TodoController) FindTodoHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(todo)
 }
 
@@ -78,26 +78,7 @@ func (c *TodoController) UpdateTodoHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(todo)
-}
-
-func (c *TodoController) UpdateTagsHandler(w http.ResponseWriter, r *http.Request) {
-	todoId := chi.URLParam(r, "id")
-	var todo model.Todo
-
-	if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
-		http.Error(w, "無効なリクエストが送信されました", http.StatusBadRequest)
-		return
-	}
-
-	if err := c.service.UpdateTodo(r.Context(), todoId, &todo); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(todo)
 }
 
@@ -109,5 +90,5 @@ func (c *TodoController) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusNoContent)
 }
