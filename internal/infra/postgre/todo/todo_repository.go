@@ -101,6 +101,7 @@ func (r *TodoRepositoryImpl) CreateTodo(ctx context.Context, todo *model.Todo) e
 	if err != nil {
 		return err
 	}
+	todo.Id = todoID
 
 	for _, tagId := range todo.TagIds {
 		record := goqu.Record{
