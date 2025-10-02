@@ -84,6 +84,12 @@ func (r *TodoRepositoryImpl) FindTodoById(ctx context.Context, todoId int) (*mod
 }
 
 func (r *TodoRepositoryImpl) CreateTodo(ctx context.Context, todo *model.Todo) error {
+	tx, err := r.db.BeginTx(ctx, nil)
+
+	if err != nil {
+		return err
+	}
+
 	record := goqu.Record{
 		"title":        todo.Title,
 		"is_completed": todo.IsCompleted,
@@ -92,6 +98,7 @@ func (r *TodoRepositoryImpl) CreateTodo(ctx context.Context, todo *model.Todo) e
 	query, args, err := r.goqu.Insert("todos").Rows(record).Returning("id").ToSQL()
 
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
@@ -99,6 +106,7 @@ func (r *TodoRepositoryImpl) CreateTodo(ctx context.Context, todo *model.Todo) e
 	err = r.db.QueryRowContext(ctx, query, args...).Scan(&todoID)
 
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 	todo.Id = todoID
@@ -111,16 +119,18 @@ func (r *TodoRepositoryImpl) CreateTodo(ctx context.Context, todo *model.Todo) e
 		query, args, err := r.goqu.Insert("todo_tags").Rows(record).ToSQL()
 
 		if err != nil {
+			tx.Rollback()
 			return err
 		}
 		_, err = r.db.Exec(query, args...)
 
 		if err != nil {
+			tx.Rollback()
 			return err
 		}
 	}
 
-	return nil
+	return tx.Commit()
 }
 
 func (r *TodoRepositoryImpl) UpdateTodo(ctx context.Context, todoId int, todo *model.Todo) error {
