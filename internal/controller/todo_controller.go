@@ -33,8 +33,8 @@ func (c *TodoController) FetchAllTodoHandler(w http.ResponseWriter, r *http.Requ
 }
 
 func (c *TodoController) FindTodoHandler(w http.ResponseWriter, r *http.Request) {
-	userId := chi.URLParam(r, "id")
-	todo, err := c.service.FindTodoById(r.Context(), userId)
+	todoId := chi.URLParam(r, "id")
+	todo, err := c.service.FindTodoById(r.Context(), todoId)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -64,7 +64,7 @@ func (c *TodoController) CreateTodoHandler(w http.ResponseWriter, r *http.Reques
 }
 
 func (c *TodoController) UpdateTodoHandler(w http.ResponseWriter, r *http.Request) {
-	userId := chi.URLParam(r, "id")
+	todoId := chi.URLParam(r, "id")
 	var todo model.Todo
 
 	if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
@@ -72,7 +72,7 @@ func (c *TodoController) UpdateTodoHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if err := c.service.UpdateTodo(r.Context(), userId, &todo); err != nil {
+	if err := c.service.UpdateTodo(r.Context(), todoId, &todo); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -83,9 +83,9 @@ func (c *TodoController) UpdateTodoHandler(w http.ResponseWriter, r *http.Reques
 }
 
 func (c *TodoController) DeleteHandler(w http.ResponseWriter, r *http.Request) {
-	userId := chi.URLParam(r, "id")
+	todoId := chi.URLParam(r, "id")
 
-	if err := c.service.DeleteTodo(r.Context(), userId); err != nil {
+	if err := c.service.DeleteTodo(r.Context(), todoId); err != nil {
 		http.Error(w, "無効なリクエストが送信されました", http.StatusInternalServerError)
 		return
 	}
