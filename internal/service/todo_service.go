@@ -36,13 +36,13 @@ func (s *TodoServiceImpl) FetchAllTodo(ctx context.Context) ([]*model.Todo, erro
 }
 
 func (s *TodoServiceImpl) FindTodoById(ctx context.Context, id string) (*model.Todo, error) {
-	userId, err := strconv.Atoi(id)
+	todoId, err := strconv.Atoi(id)
 
 	if err != nil {
 		return nil, fmt.Errorf("不正なパラムが検知されました。%w", err)
 	}
 
-	todo, err := s.repo.FindTodoById(ctx, userId)
+	todo, err := s.repo.FindTodoById(ctx, todoId)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		err := fmt.Errorf("Todoは存在しません:%w", sql.ErrNoRows)
@@ -65,13 +65,13 @@ func (s *TodoServiceImpl) CreateTodo(ctx context.Context, todo *model.Todo) erro
 }
 
 func (s *TodoServiceImpl) UpdateTodo(ctx context.Context, id string, todo *model.Todo) error {
-	userId, err := strconv.Atoi(id)
+	todoId, err := strconv.Atoi(id)
 
 	if err != nil {
 		return fmt.Errorf("不正なパラムが検知されました。%w", err)
 	}
 
-	err = s.repo.UpdateTodo(ctx, userId, todo)
+	err = s.repo.UpdateTodo(ctx, todoId, todo)
 	if errors.Is(err, sql.ErrNoRows) {
 		err := fmt.Errorf("Todoは存在しません:%w", sql.ErrNoRows)
 		return err
@@ -79,8 +79,8 @@ func (s *TodoServiceImpl) UpdateTodo(ctx context.Context, id string, todo *model
 	return nil
 }
 
-func (s *TodoServiceImpl) DeleteTodo(ctx context.Context, userId string) error {
-	id, err := strconv.Atoi(userId)
+func (s *TodoServiceImpl) DeleteTodo(ctx context.Context, todoId string) error {
+	id, err := strconv.Atoi(todoId)
 	if err != nil {
 		return fmt.Errorf("不正なパラムが検知されました。%w", err)
 	}

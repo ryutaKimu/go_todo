@@ -55,12 +55,12 @@ func (r *TodoRepositoryImpl) FetchAllTodo(ctx context.Context) ([]*model.Todo, e
 	return todos, nil
 }
 
-func (r *TodoRepositoryImpl) FindTodoById(ctx context.Context, userId int) (*model.Todo, error) {
+func (r *TodoRepositoryImpl) FindTodoById(ctx context.Context, todoId int) (*model.Todo, error) {
 	query, args, err := r.goqu.
 		From("todos").
 		Select("id", "title", "is_completed").
 		Where(goqu.Ex{
-			"id": userId,
+			"id": todoId,
 		}).
 		ToSQL()
 
@@ -122,7 +122,7 @@ func (r *TodoRepositoryImpl) CreateTodo(ctx context.Context, todo *model.Todo) e
 	return nil
 }
 
-func (r *TodoRepositoryImpl) UpdateTodo(ctx context.Context, userId int, todo *model.Todo) error {
+func (r *TodoRepositoryImpl) UpdateTodo(ctx context.Context, todoId int, todo *model.Todo) error {
 	query, args, err := r.goqu.Update("todos").
 		Set(goqu.Record{
 			"title":        todo.Title,
@@ -130,7 +130,7 @@ func (r *TodoRepositoryImpl) UpdateTodo(ctx context.Context, userId int, todo *m
 			"updated_at":   goqu.L("NOW()"),
 		}).
 		Where(goqu.Ex{
-			"id": userId,
+			"id": todoId,
 		}).
 		ToSQL()
 
