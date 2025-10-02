@@ -82,25 +82,6 @@ func (c *TodoController) UpdateTodoHandler(w http.ResponseWriter, r *http.Reques
 	json.NewEncoder(w).Encode(todo)
 }
 
-func (c *TodoController) UpdateTagsHandler(w http.ResponseWriter, r *http.Request) {
-	todoId := chi.URLParam(r, "id")
-	var todo model.Todo
-
-	if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
-		http.Error(w, "無効なリクエストが送信されました", http.StatusBadRequest)
-		return
-	}
-
-	if err := c.service.UpdateTodo(r.Context(), todoId, &todo); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(todo)
-}
-
 func (c *TodoController) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	todoId := chi.URLParam(r, "id")
 
