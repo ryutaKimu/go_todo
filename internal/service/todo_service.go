@@ -76,6 +76,13 @@ func (s *TodoServiceImpl) UpdateTodo(ctx context.Context, id string, todo *model
 		err := fmt.Errorf("Todoは存在しません:%w", sql.ErrNoRows)
 		return err
 	}
+
+	err = s.repo.UpdateTodoTags(ctx, todoId, todo)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

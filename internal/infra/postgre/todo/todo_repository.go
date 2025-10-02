@@ -156,6 +156,81 @@ func (r *TodoRepositoryImpl) UpdateTodo(ctx context.Context, todoId int, todo *m
 
 }
 
+func (r *TodoRepositoryImpl) UpdateTodoTags(ctx context.Context, todoId int, todo *model.Todo) error {
+
+	query, args, err := r.goqu.
+		Select("tag_id").
+		From("todo_tags").
+		Where(goqu.Ex{
+			"todo_id": todoId,
+		}).
+		ToSQL()
+
+	if err != nil {
+		return err
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+
+	var existTags []int
+
+	for rows.Next() {
+		var tagID int
+		if err := rows.Scan(&tagID); err != nil {
+			return err
+		}
+		existTags = append(existTags, tagID)
+	}
+
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	newTags := todo.TagIds
+
+	toAdd := addTags(newTags, existTags)
+	toDelete := deleteTags(existTags, newTags)
+
+	for _, tagID := range toAdd {
+		insertQuery, insertArgs, err := r.goqu.
+			Insert("todo_tags").
+			Rows(goqu.Record{
+				"todo_id": todoId,
+				"tag_id":  tagID,
+			}).
+			ToSQL()
+		if err != nil {
+			return err
+		}
+		if _, err := r.db.ExecContext(ctx, insertQuery, insertArgs...); err != nil {
+			return err
+		}
+	}
+
+	for _, tagID := range toDelete {
+		deleteQuery, deleteArgs, err := r.goqu.
+			Delete("todo_tags").
+			Where(goqu.Ex{
+				"todo_id": todoId,
+				"tag_id":  tagID,
+			}).
+			ToSQL()
+		if err != nil {
+			return err
+		}
+		if _, err := r.db.ExecContext(ctx, deleteQuery, deleteArgs...); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (r *TodoRepositoryImpl) DeleteTodo(ctx context.Context, userId int) error {
 	query, _, err := r.goqu.Delete("todos").
 		Where(goqu.Ex{"id": userId}).
@@ -182,4 +257,34 @@ func (r *TodoRepositoryImpl) DeleteTodo(ctx context.Context, userId int) error {
 	}
 
 	return nil
+}
+
+/*
+差分を求めて、中間テーブルを更新するために使用
+引数の順番で追加と削除が変わる仕組み
+*/
+func difference(a []int, b []int) []int {
+	m := make(map[int]bool)
+
+	for _, x := range b {
+		m[x] = true
+	}
+
+	var diff []int
+
+	for _, x := range a {
+		if !m[x] {
+			diff = append(diff, x)
+		}
+	}
+
+	return diff
+}
+
+func addTags(newTags []int, preTags []int) []int {
+	return difference(newTags, preTags)
+}
+
+func deleteTags(preTags []int, newTags []int) []int {
+	return difference(preTags, newTags)
 }
